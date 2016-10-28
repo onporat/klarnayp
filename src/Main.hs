@@ -11,6 +11,7 @@ import Data.Text.Encoding
 import Data.Monoid
 import Heist
 import Heist.Interpreted
+import Text.XmlHtml hiding (render)
 import Control.Monad.Trans
 import Solr
 
@@ -53,7 +54,8 @@ personSplice person = do
 
 
 personsSplice  :: [Person] -> Splice (Handler App App)
-personsSplice = mapSplices (runChildrenWith . personSplice)
+personsSplice [] = return [TextNode "No results, please review your search or try a different one"]
+personsSplice p  = mapSplices (runChildrenWith . personSplice) p
 
 
 appInit :: SnapletInit App App

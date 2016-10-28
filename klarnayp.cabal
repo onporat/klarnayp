@@ -22,6 +22,7 @@ Executable klarnayp
                , lens                      >= 3.9
                , text                      >= 0.11
                , mtl
+               , xmlhtml
                , wreq
                , aeson
                , lens-aeson
