@@ -9,17 +9,22 @@ maintainer:          onporat@gmail.com
 copyright:           2016 Oded Porat
 category:            Web
 build-type:          Simple
+cabal-version:       >= 1.2
 
 Executable klarnayp
-  Hs-source-dirs: src
-  Main-is: Main.hs
-  Build-depends: base                      >= 4        && < 5
+  hs-source-dirs: src
+  main-is: Main.hs
+  other-modules: Solr
+  build-depends: base                      >= 4        && < 5
                , snap                      >= 0.12
                , snap-core                 >= 0.9      && < 0.10
                , heist                     >= 0.12
                , lens                      >= 3.9
                , text                      >= 0.11
                , mtl
+               , wreq
+               , aeson
+               , lens-aeson
   GHC-options: -threaded -O2
   Extensions: OverloadedStrings
             , TemplateHaskell

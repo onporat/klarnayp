@@ -16,6 +16,22 @@
           -->
         </form>
       </div>
+  <people>
+    <div class="results">
+      <div class="cui__selector--direct title">
+        <h2 class="cui__selector--direct__title">Search results</h2>
+        <div class="cui__selector--direct__item">
+          <img class="user-avatar" src="${avatar}" />
+          <div class="cui__selector--direct__label">
+            <name />
+          </div>
+          <p class="cui__selector--direct__description">
+            <street /> <city />, <country />
+          </p>
+        </div>
+      </div>
+    </div>
+  </people>
     </div>
   </body>
 </html>

@@ -12,6 +12,7 @@ import Data.Monoid
 import Heist
 import Heist.Interpreted
 import Control.Monad.Trans
+import Solr
 
 data App
   = App { _heist :: Snaplet (Heist App)
@@ -22,14 +23,17 @@ makeLenses ''App
 instance HasHeist App where
   heistLens = subSnaplet heist
 
+
 indexHandler :: Handler App App ()
 indexHandler = do
   mQuery <- getParam "q"
   case mQuery of
     Just query -> do
       searchInputContents .= (Just $ decodeUtf8 query)
-      render "index"
+      results <- liftIO $ searchPeople $ decodeUtf8 query
+      renderWithSplices "index" ("people" ## personsSplice results)
     Nothing -> render "index"
+
 
 searchInputAttributeSplice :: AttrSplice (Handler App App)
 searchInputAttributeSplice _ = do
@@ -38,8 +42,22 @@ searchInputAttributeSplice _ = do
     Just contents -> return [("value", contents)]
     Nothing -> return []
 
-memoiseInit :: SnapletInit App App
-memoiseInit = makeSnaplet "app" "Klarna Yellow Pages exercise" Nothing $ do
+
+personSplice :: Monad m => Person -> Splices (HeistT n m Template)
+personSplice person = do
+  "name" ## textSplice (personName person)
+  "avatar" ## textSplice (personAvatar person)
+  "street" ## textSplice (personStreet person)
+  "city" ## textSplice (personCity person)
+  "country" ## textSplice (personCountry person)
+
+
+personsSplice  :: [Person] -> Splice (Handler App App)
+personsSplice = mapSplices (runChildrenWith . personSplice)
+
+
+appInit :: SnapletInit App App
+appInit = makeSnaplet "app" "Klarna Yellow Pages exercise" Nothing $ do
   h <- nestSnaplet "heist" heist $ heistInit "templates"
   modifyHeistState $ bindAttributeSplices ("search-input" ## searchInputAttributeSplice)
   addRoutes [ ("static", serveDirectory "static")
@@ -51,5 +69,5 @@ memoiseInit = makeSnaplet "app" "Klarna Yellow Pages exercise" Nothing $ do
 
 main :: IO ()
 main = do
-  (_, site, _) <- runSnaplet Nothing memoiseInit
+  (_, site, _) <- runSnaplet Nothing appInit
   quickHttpServe site
