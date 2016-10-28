@@ -1,0 +1,26 @@
+name:                klarnayp
+version:             0.1
+synopsis:            Klarna Yellow Pages exercise
+description:         Please see README.md
+homepage:            https://github.com/onporat/klarnayp#readme
+license:             BSD3
+author:              Oded Porat
+maintainer:          onporat@gmail.com
+copyright:           2016 Oded Porat
+category:            Web
+build-type:          Simple
+
+Executable klarnayp
+  Hs-source-dirs: src
+  Main-is: Main.hs
+  Build-depends: base                      >= 4        && < 5
+               , snap                      >= 0.12
+               , snap-core                 >= 0.9      && < 0.10
+               , heist                     >= 0.12
+               , lens                      >= 3.9
+               , text                      >= 0.11
+               , mtl
+  GHC-options: -threaded -O2
+  Extensions: OverloadedStrings
+            , TemplateHaskell
+            , FlexibleInstances
