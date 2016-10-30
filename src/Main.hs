@@ -1,23 +1,26 @@
-{-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
-{-# LANGUAGE ConstraintKinds #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ConstraintKinds      #-}
+{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE OverloadedStrings    #-}
+{-# LANGUAGE UndecidableInstances #-}
 
-import Snap
-import Snap.Snaplet.Heist
-import Snap.Util.FileServe
-import Control.Lens
-import Data.Text
-import Data.Text.Encoding
-import Data.Monoid
-import Heist
-import Heist.Interpreted
-import Text.XmlHtml hiding (render)
-import Control.Monad.Trans
-import Solr
-import Types
+module Main where
+
+import           Control.Lens
+import           Control.Monad.Trans
+import           Data.Monoid
+import           Data.Text
+import           Data.Text.Encoding
+import           Heist
+import           Heist.Interpreted
+import           Snap
+import           Snap.Snaplet.Heist
+import           Snap.Util.FileServe
+import           Solr
+import           Text.XmlHtml        hiding (render)
+import           Types
 
 data App
-  = App { _heist :: Snaplet (Heist App)
+  = App { _heist               :: Snaplet (Heist App)
         , _searchInputContents :: Maybe Text
         }
 makeLenses ''App

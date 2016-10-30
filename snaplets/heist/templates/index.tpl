@@ -19,17 +19,17 @@
     <div class="results">
       <div class="cui__selector--direct title">
         <h2 class="cui__selector--direct__title">Search results</h2>
-  <people>
-        <div class="cui__selector--direct__item">
-          <img class="user-avatar" src="${avatar}" />
-          <div class="cui__selector--direct__label">
-            <name />
+        <people>
+          <div class="cui__selector--direct__item">
+            <img class="user-avatar" src="${avatar}" />
+            <div class="cui__selector--direct__label">
+              <name />
+            </div>
+            <p class="cui__selector--direct__description">
+              <street /> <city />, <country />
+            </p>
           </div>
-          <p class="cui__selector--direct__description">
-            <street /> <city />, <country />
-          </p>
-        </div>
-  </people>
+        </people>
       </div>
     </div>
     </div>

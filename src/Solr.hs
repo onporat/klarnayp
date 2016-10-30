@@ -1,22 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Solr where
---  ( searchPeople
---  , Person()
---  ) where
+module Solr
+  ( searchPeople
+  ) where
 
-import Text.Printf (printf)
-import Data.Time.Clock (UTCTime(..), getCurrentTime)
-import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
-import Data.Time.Calendar (Day, addGregorianYearsClip)
 import           Control.Lens
-import           Data.Aeson      (Value)
-import           Data.Aeson.Lens (key, _Array, _String)
-import           Data.Text       (Text, append, pack, empty, intercalate)
-import           Network.Wreq    (Options, asValue, defaults, getWith, param,
-                                  responseBody)
-import Types
-import QueryParser
+import           Data.Aeson            (Value)
+import           Data.Aeson.Lens       (key, _Array, _String)
+import           Data.Text             (Text, append, empty, intercalate, pack)
+import           Data.Time.Calendar    (Day, addGregorianYearsClip)
+import           Data.Time.Clock       (UTCTime (..), getCurrentTime)
+import           Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
+import           Network.Wreq          (Options, asValue, defaults, getWith,
+                                        param, responseBody)
+import           QueryParser
+import           Text.Printf           (printf)
+import           Types
 
 
 
@@ -50,9 +49,9 @@ searchPeople searchQuery = do
   case parseQuery searchQuery of
     Left err -> return []
     Right searchTokens -> do
-      print searchTokens
+
       let searchOpts = intercalate " AND " $ map (toSolrQuery today) $ filter (/= Unknown) searchTokens
-      print $ map (toSolrQuery today) searchTokens
+
       response <- getWith (getSearchParams searchOpts) solrPeopleUrl
 
       -- Parse the ByteString response, including headers and body,
@@ -77,8 +76,8 @@ toSolrQuery _ (Phone p) = pack (printf "phone:%s-%s" l r :: String)
     (l,r) = splitAt 4 p
 toSolrQuery t (Age a) = pack $ printf "birthday:[%d TO %d]" from to
   where
-    from = utcTimeToSec $ ageToUTCTime t (a + 1)
-    to   = utcTimeToSec $ ageToUTCTime t a
+    from = utcTimeToSec $ ageToUTCTime t a
+    to   = utcTimeToSec $ ageToUTCTime t (a - 1)
 toSolrQuery _ Unknown = empty
 
 
