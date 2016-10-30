@@ -6,7 +6,8 @@ module Solr
 
 import           Control.Lens
 import           Data.Aeson            (Value)
-import           Data.Aeson.Lens       (key, _Array, _String)
+import Data.Maybe (fromMaybe)
+import           Data.Aeson.Lens       (key, _Array, _String, _Integer)
 import           Data.Text             (Text, append, empty, intercalate, pack)
 import           Data.Time.Calendar    (Day, addGregorianYearsClip)
 import           Data.Time.Clock       (UTCTime (..), getCurrentTime)
@@ -35,6 +36,8 @@ getSearchParams searchOpts = defaults
 jsonToPerson :: Value -> Person
 jsonToPerson json =
      Person { personName = view (key "name" . _String) json
+            , personBirthday = fromMaybe 0 $ json ^? key "birthday" . _Integer
+            , personPhone = view (key "phone" . _String) json
             , personAvatar = view (key "avatar_origin" . _String) json
             , personStreet = view (key "address.street" . _String) json
             , personCity = view (key "address.city" . _String) json
@@ -76,8 +79,8 @@ toSolrQuery _ (Phone p) = pack (printf "phone:%s-%s" l r :: String)
     (l,r) = splitAt 4 p
 toSolrQuery t (Age a) = pack $ printf "birthday:[%d TO %d]" from to
   where
-    from = utcTimeToSec $ ageToUTCTime t a
-    to   = utcTimeToSec $ ageToUTCTime t (a - 1)
+    from = utcTimeToSec $ ageToUTCTime t (a + 1)
+    to   = utcTimeToSec $ ageToUTCTime t a
 toSolrQuery _ Unknown = empty
 
 

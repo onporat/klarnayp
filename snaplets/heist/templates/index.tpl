@@ -26,6 +26,12 @@
               <name />
             </div>
             <p class="cui__selector--direct__description">
+              <age />
+            </p>
+            <p class="cui__selector--direct__description">
+              <phone />
+            </p>
+            <p class="cui__selector--direct__description">
               <street /> <city />, <country />
             </p>
           </div>

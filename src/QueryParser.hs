@@ -6,13 +6,13 @@ module QueryParser
   , parseQueryTest
   ) where
 
-import Control.Applicative (empty)
-import Control.Monad (void)
-import Text.Megaparsec
-import Text.Megaparsec.Text
+import           Control.Applicative   (empty)
+import           Control.Monad         (void)
+import           Data.Text             (Text, pack)
+import           Text.Megaparsec
 import qualified Text.Megaparsec.Lexer as L
-import Data.Text (Text, pack)
-import Types
+import           Text.Megaparsec.Text
+import           Types
 
 
 sc :: Parser ()
@@ -32,7 +32,7 @@ number = lexeme (p >>= check)
     p       = (:) <$> numberChar <*> some numberChar
     check x = if (length x) == 2 && (head x) /= '0'
                 then return $ Age (read x)
-                else if length x == 9
+                else if length x >= 9
                        then return $ Phone x
                        else return Unknown
 

@@ -3,11 +3,13 @@ module Types where
 import           Data.Text (Text)
 
 data Person = Person
-  { personName    :: !Text
-  , personAvatar  :: !Text
-  , personStreet  :: !Text
-  , personCity    :: !Text
-  , personCountry :: !Text
+  { personName     :: !Text
+  , personPhone    :: !Text
+  , personBirthday :: Integer
+  , personAvatar   :: !Text
+  , personStreet   :: !Text
+  , personCity     :: !Text
+  , personCountry  :: !Text
   }
   deriving (Show)
 
