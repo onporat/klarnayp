@@ -14,6 +14,7 @@ import Heist.Interpreted
 import Text.XmlHtml hiding (render)
 import Control.Monad.Trans
 import Solr
+import Types
 
 data App
   = App { _heist :: Snaplet (Heist App)

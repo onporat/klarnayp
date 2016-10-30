@@ -5,34 +5,31 @@ module Solr where
 --  , Person()
 --  ) where
 
+import Text.Printf (printf)
+import Data.Time.Clock (UTCTime(..), getCurrentTime)
+import Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
+import Data.Time.Calendar (Day, addGregorianYearsClip)
 import           Control.Lens
 import           Data.Aeson      (Value)
 import           Data.Aeson.Lens (key, _Array, _String)
-import           Data.Text       (Text, append, pack)
+import           Data.Text       (Text, append, pack, empty, intercalate)
 import           Network.Wreq    (Options, asValue, defaults, getWith, param,
                                   responseBody)
-
-data Person = Person
-  { personName    :: !Text
-  , personAvatar  :: !Text
-  , personStreet  :: !Text
-  , personCity    :: !Text
-  , personCountry :: !Text
-  }
-  deriving (Show)
+import Types
+import QueryParser
 
 
-type SearchOptions = Text
 
 solrPeopleUrl :: String
 solrPeopleUrl = "http://localhost:8983/solr/people/select"
 
-getSearchParams :: SearchOptions -> Options
+
+getSearchParams :: Text -> Options
 getSearchParams searchOpts = defaults
   & param "wt" .~ ["json"]
   & param "start" .~ ["0"]
   & param "rows" .~ ["10"]
-  & param "q" .~ ["name:" `append` searchOpts]
+  & param "q" .~ [searchOpts]
 
 
 -- | Extract our typed data model from an untyped JSON object.
@@ -45,23 +42,48 @@ jsonToPerson json =
             , personCountry = view (key "address.country" . _String) json
             }
 
-searchPeople :: SearchOptions -> IO [Person]
-searchPeople searchOpts = do
+searchPeople :: Text -> IO [Person]
+searchPeople searchQuery = do
   -- Go out to Web to receive a lazy ByteString.
-  response <- getWith (getSearchParams searchOpts) solrPeopleUrl
+  UTCTime today _ <- getCurrentTime
 
-  -- Parse the ByteString response, including headers and body,
-  -- into an untyped JSON object.
-  jsonResponse <- asValue response
+  case parseQuery searchQuery of
+    Left err -> return []
+    Right searchTokens -> do
+      print searchTokens
+      let searchOpts = intercalate " AND " $ map (toSolrQuery today) $ filter (/= Unknown) searchTokens
+      print $ map (toSolrQuery today) searchTokens
+      response <- getWith (getSearchParams searchOpts) solrPeopleUrl
 
-  -- Extract the list of people
-  let foundPeople = toListOf ( responseBody
-                             . key "response"
-                             . key "docs"
-                             . _Array
-                             . traverse
-                             ) jsonResponse
+      -- Parse the ByteString response, including headers and body,
+      -- into an untyped JSON object.
+      jsonResponse <- asValue response
 
-  -- For each event, extract its name and the name of its venue.
-  return (map jsonToPerson foundPeople)
+      -- Extract the list of people
+      let foundPeople = toListOf ( responseBody
+                                 . key "response"
+                                 . key "docs"
+                                 . _Array
+                                 . traverse
+                                 ) jsonResponse
 
+      -- For each event, extract its name and the name of its venue.
+      return (map jsonToPerson foundPeople)
+
+toSolrQuery :: Day -> QueryToken -> Text
+toSolrQuery _ (Name n)  = "name:" `append` n
+toSolrQuery _ (Phone p) = pack (printf "phone:%s-%s" l r :: String)
+  where
+    (l,r) = splitAt 4 p
+toSolrQuery t (Age a) = pack $ printf "birthday:[%d TO %d]" from to
+  where
+    from = utcTimeToSec $ ageToUTCTime t (a + 1)
+    to   = utcTimeToSec $ ageToUTCTime t a
+toSolrQuery _ Unknown = empty
+
+
+utcTimeToSec :: UTCTime -> Integer
+utcTimeToSec u = floor $ utcTimeToPOSIXSeconds u :: Integer
+
+ageToUTCTime :: Day -> Integer -> UTCTime
+ageToUTCTime t a = UTCTime (addGregorianYearsClip (negate a) t) 0
