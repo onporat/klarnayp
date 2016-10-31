@@ -41,7 +41,8 @@ indexHandler = do
       searchInputContents .= (Just $ decodeUtf8 query)
       results <- liftIO $ searchPeople $ decodeUtf8 query
       renderWithSplices "index" ("people" ## personsSplice today results)
-    Nothing -> render "index"
+    Nothing ->
+      renderWithSplices "index" ("people" ## return [])
 
 
 searchInputAttributeSplice :: AttrSplice (Handler App App)

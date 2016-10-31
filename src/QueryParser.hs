@@ -22,14 +22,22 @@ sc = L.space (void spaceChar) empty empty
 lexeme :: Parser a -> Parser a
 lexeme = L.lexeme sc
 
+
 -- at leat two chars name
 name :: Parser QueryToken
 name = Name . pack <$> (lexeme ((:) <$> letterChar <*> some letterChar))
 
+
+-- accept digits or dash, remove dashes
+numString :: Parser String
+numString = do
+    nums <- some (digitChar <|> char '-')
+    return (filter (/='-') nums)
+
+
 number :: Parser QueryToken
-number = lexeme (p >>= check)
+number = lexeme (numString >>= check)
   where
-    p       = (:) <$> numberChar <*> some numberChar
     check x = if (length x) == 2 && (head x) /= '0'
                 then return $ Age (read x)
                 else if length x >= 9

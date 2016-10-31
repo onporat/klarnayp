@@ -3,7 +3,7 @@
 ## install solr-6.2.1
 
 ## Download data
-http://www.klarnaisrael.com/exercise
+wget -O exercise.zip http://www.klarnaisrael.com/exercise
 
 ## start solr
 $ cd SOLR_HOME
