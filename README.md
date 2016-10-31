@@ -72,3 +72,9 @@ stack build
 
 ### Import people json into Solr
 see data/solr-import.md
+
+### Run
+```
+stack exec klarnayp
+```
+go to http://0.0.0.0:8000/
