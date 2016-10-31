@@ -48,7 +48,7 @@ Feel free to get in touch with us (just reply to the thread where you got this e
 Good luck!
 
 # setup - clone / build / run
-## prerequisites
+## Prerequisites
 ### install solr
 Download Solr from http://lucene.apache.org/solr/downloads.html
 
@@ -62,7 +62,7 @@ We'll call it SOLR_HOME
 ### Install The Haskell Tool Stack
 Instructions https://docs.haskellstack.org/en/stable/install_and_upgrade/
 
-### clone and build
+## clone and build
 Clone the project
 ```
 git clone https://github.com/onporat/klarnayp
