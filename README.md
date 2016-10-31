@@ -46,3 +46,29 @@ Either way, we obviously want your code so be sure to send that over.
 Feel free to get in touch with us (just reply to the thread where you got this exercise) if things are unclear.
 
 Good luck!
+
+# setup - clone / build / run
+## prerequisites
+### install solr
+Download Solr from http://lucene.apache.org/solr/downloads.html
+
+Extract Solr archive
+```
+unzip -q solr-6.2.1.zip
+```
+We'll call it SOLR_HOME
+(Tested with Solr v6.2.1)
+
+### Install The Haskell Tool Stack
+Instructions https://docs.haskellstack.org/en/stable/install_and_upgrade/
+
+### clone and build
+Clone the project
+```
+git clone https://github.com/onporat/klarnayp
+cd klarnayp
+stack build
+```
+
+### Import people json into Solr
+see data/solr-import.md
