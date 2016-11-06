@@ -6,16 +6,16 @@ module Solr
 
 import           Control.Lens
 import           Data.Aeson            (Value)
-import Data.Maybe (fromMaybe)
-import           Data.Aeson.Lens       (key, _Array, _String, _Integer)
+import           Data.Aeson.Lens       (key, _Array, _Integer, _String)
+import           Data.Maybe            (fromMaybe)
 import           Data.Text             (Text, append, empty, intercalate, pack)
 import           Data.Time.Calendar    (Day, addGregorianYearsClip)
 import           Data.Time.Clock       (UTCTime (..), getCurrentTime)
 import           Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
 import           Network.Wreq          (Options, asValue, defaults, getWith,
                                         param, responseBody)
-import           QueryParser
 import           Text.Printf           (printf)
+import           QueryParser
 import           Types
 
 
@@ -44,13 +44,16 @@ jsonToPerson json =
             , personCountry = view (key "address.country" . _String) json
             }
 
+
 searchPeople :: Text -> IO [Person]
 searchPeople searchQuery = do
   -- Go out to Web to receive a lazy ByteString.
   UTCTime today _ <- getCurrentTime
 
   case parseQuery searchQuery of
-    Left err -> return []
+    Left err -> do
+      print err
+      return []
     Right searchTokens -> do
 
       let searchOpts = intercalate " AND " $ map (toSolrQuery today) $ filter (/= Unknown) searchTokens
@@ -69,12 +72,13 @@ searchPeople searchQuery = do
                                  . traverse
                                  ) jsonResponse
 
-      -- For each event, extract its name and the name of its venue.
+      -- convert json list person list
       return (map jsonToPerson foundPeople)
+
 
 toSolrQuery :: Day -> QueryToken -> Text
 toSolrQuery _ (Name n)  = "name:" `append` n
-toSolrQuery _ (Phone p) = pack (printf "phone:%s-%s" l r :: String)
+toSolrQuery _ (Phone p) = pack $ printf "phone:%s-%s" l r
   where
     (l,r) = splitAt 4 p
 toSolrQuery t (Age a) = pack $ printf "birthday:[%d TO %d]" from to
@@ -87,5 +91,7 @@ toSolrQuery _ Unknown = empty
 utcTimeToSec :: UTCTime -> Integer
 utcTimeToSec u = floor $ utcTimeToPOSIXSeconds u :: Integer
 
+
 ageToUTCTime :: Day -> Integer -> UTCTime
 ageToUTCTime t a = UTCTime (addGregorianYearsClip (negate a) t) 0
+

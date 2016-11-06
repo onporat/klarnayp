@@ -3,7 +3,6 @@
 
 module QueryParser
   ( parseQuery
-  , parseQueryTest
   ) where
 
 import           Control.Applicative   (empty)
@@ -16,7 +15,7 @@ import           Types
 
 
 sc :: Parser ()
-sc = L.space (void spaceChar) empty empty
+sc = L.space (void spaceChar) (void (char '.')) empty
 
 
 lexeme :: Parser a -> Parser a
@@ -47,7 +46,7 @@ number = lexeme (numString >>= check)
 
 unknown :: Parser QueryToken
 unknown = do
-  (skipSome (noneOf " "))
+  lexeme $ skipSome (noneOf " ")
   return $ Unknown
 
 
@@ -62,6 +61,7 @@ queryParser = do
   skipMany spaceChar
   many queryTokenParser
 
+
+parseQuery :: Text -> Either ParseError [QueryToken]
 parseQuery = parse queryParser ""
 
-parseQueryTest = parseTest queryParser
