@@ -13,6 +13,7 @@ $ bin/solr create -c people
 ## update solr schema
 ```
 cp data/managed-schema SOLR_HOME/server/solr/people/conf/managed-schema
+cp solrconfig.xml SORL_HOME/server/solr/people/conf/solrconfig.xml
 $ bin/solr restart
 ```
 ## import data
