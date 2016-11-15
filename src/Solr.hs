@@ -9,9 +9,9 @@ import           Data.Aeson            (Value)
 import           Data.Aeson.Lens       (key, _Array, _Integer, _String)
 import           Data.Maybe            (fromMaybe)
 import           Data.Text             (Text, append, empty, intercalate, pack)
-import           Data.Time.Calendar    (Day, addGregorianYearsClip)
+import           Data.Time.Calendar    (Day, addGregorianYearsClip, diffDays)
 import           Data.Time.Clock       (UTCTime (..), getCurrentTime)
-import           Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds)
+import           Data.Time.Clock.POSIX (utcTimeToPOSIXSeconds, posixSecondsToUTCTime)
 import           Network.Wreq          (Options, asValue, defaults, getWith,
                                         param, responseBody)
 import           Text.Printf           (printf)
@@ -33,16 +33,19 @@ getSearchParams searchOpts = defaults
 
 
 -- | Extract our typed data model from an untyped JSON object.
-jsonToPerson :: Value -> Person
-jsonToPerson json =
-     Person { personName = view (key "name" . _String) json
-            , personBirthday = fromMaybe 0 $ json ^? key "birthday" . _Integer
-            , personPhone = view (key "phone" . _String) json
-            , personAvatar = view (key "avatar_origin" . _String) json
-            , personStreet = view (key "address.street" . _String) json
-            , personCity = view (key "address.city" . _String) json
-            , personCountry = view (key "address.country" . _String) json
-            }
+jsonToPerson :: Day -> Value -> Person
+jsonToPerson today json =
+  Person { personName = view (key "name" . _String) json
+         , personAge = age
+         , personPhone = view (key "phone" . _String) json
+         , personAvatar = view (key "avatar_origin" . _String) json
+         , personStreet = view (key "address.street" . _String) json
+         , personCity = view (key "address.city" . _String) json
+         , personCountry = view (key "address.country" . _String) json
+         }
+           where
+             bday = json ^? key "birthday" . _Integer
+             age = fromMaybe (-1) $ fmap (bdayToAge today) bday
 
 
 searchPeople :: Text -> IO [Person]
@@ -73,7 +76,7 @@ searchPeople searchQuery = do
                                  ) jsonResponse
 
       -- convert json list person list
-      return (map jsonToPerson foundPeople)
+      return (map (jsonToPerson today) foundPeople)
 
 
 toSolrQuery :: Day -> QueryToken -> Text
@@ -94,4 +97,9 @@ utcTimeToSec u = floor $ utcTimeToPOSIXSeconds u :: Integer
 
 ageToUTCTime :: Day -> Integer -> UTCTime
 ageToUTCTime t a = UTCTime (addGregorianYearsClip (negate a) t) 0
+
+bdayToAge :: Day -> Integer -> Integer
+bdayToAge today bdayTS = diffDays today bday `div` 365
+  where
+    UTCTime bday _ = posixSecondsToUTCTime (fromInteger bdayTS)
 

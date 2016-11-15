@@ -5,7 +5,7 @@ import           Data.Text (Text)
 data Person = Person
   { personName     :: !Text
   , personPhone    :: !Text
-  , personBirthday :: Integer
+  , personAge      :: Integer
   , personAvatar   :: !Text
   , personStreet   :: !Text
   , personCity     :: !Text

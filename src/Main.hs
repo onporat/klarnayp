@@ -5,9 +5,6 @@
 
 module Main where
 
-import           Data.Time.Calendar    (Day, diffDays)
-import           Data.Time.Clock       (UTCTime (..), getCurrentTime)
-import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import           Control.Lens
 import           Control.Monad.Trans
 import           Data.Monoid
@@ -37,10 +34,9 @@ indexHandler = do
   mQuery <- getParam "q"
   case mQuery of
     Just query -> do
-      UTCTime today _ <- liftIO getCurrentTime
       searchInputContents .= (Just $ decodeUtf8 query)
       results <- liftIO $ searchPeople $ decodeUtf8 query
-      renderWithSplices "index" ("people" ## personsSplice today results)
+      renderWithSplices "index" ("people" ## personsSplice results)
     Nothing ->
       renderWithSplices "index" ("people" ## return [])
 
@@ -53,22 +49,20 @@ searchInputAttributeSplice _ = do
     Nothing -> return []
 
 
-personSplice :: Monad m => Day -> Person -> Splices (HeistT n m Template)
-personSplice today person = do
-  let UTCTime bday _ = posixSecondsToUTCTime (fromInteger $ personBirthday person)
-  let age            = diffDays today bday `div` 365
+personSplice :: Monad m => Person -> Splices (HeistT n m Template)
+personSplice person = do
   "name" ## textSplice (personName person)
   "phone" ## textSplice (personPhone person)
-  "age" ## textSplice (pack $ show $ age)
+  "age" ## textSplice (pack $ show $ personAge person)
   "avatar" ## textSplice (personAvatar person)
   "street" ## textSplice (personStreet person)
   "city" ## textSplice (personCity person)
   "country" ## textSplice (personCountry person)
 
 
-personsSplice  :: Day -> [Person] -> Splice (Handler App App)
-personsSplice _ [] = return [TextNode "No results, please review your search or try a different one"]
-personsSplice today p  = mapSplices (runChildrenWith . personSplice today) p
+personsSplice  :: [Person] -> Splice (Handler App App)
+personsSplice [] = return [TextNode "No results, please review your search or try a different one"]
+personsSplice p  = mapSplices (runChildrenWith . personSplice) p
 
 
 appInit :: SnapletInit App App
